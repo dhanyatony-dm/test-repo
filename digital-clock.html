@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digital Clock - Multiple Time Zones</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            max-width: 1000px;
+        }
+
+        h1 {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .clock-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .clock-card {
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .clock-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .timezone-name {
+            color: #e0e0e0;
+            font-size: 0.9em;
+            font-weight: 600;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .time-display {
+            color: #ffffff;
+            font-size: 2.2em;
+            font-weight: bold;
+            font-family: 'Courier New', monospace;
+            margin-bottom: 8px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .date-display {
+            color: #b0b0b0;
+            font-size: 0.85em;
+            font-family: 'Courier New', monospace;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 1.8em;
+                margin-bottom: 30px;
+            }
+
+            .clock-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .time-display {
+                font-size: 1.8em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🕐 World Clock</h1>
+        <div class="clock-grid" id="clockGrid"></div>
+    </div>
+
+    <script>
+        const timeZones = [
+            { name: 'UTC', tz: 'UTC' },
+            { name: 'Eastern Time (US)', tz: 'America/New_York' },
+            { name: 'Central Time (US)', tz: 'America/Chicago' },
+            { name: 'Mountain Time (US)', tz: 'America/Denver' },
+            { name: 'Pacific Time (US)', tz: 'America/Los_Angeles' },
+            { name: 'London', tz: 'Europe/London' },
+            { name: 'Paris', tz: 'Europe/Paris' },
+            { name: 'Tokyo', tz: 'Asia/Tokyo' },
+            { name: 'Sydney', tz: 'Australia/Sydney' },
+            { name: 'Dubai', tz: 'Asia/Dubai' },
+            { name: 'Singapore', tz: 'Asia/Singapore' },
+            { name: 'Hong Kong', tz: 'Asia/Hong_Kong' }
+        ];
+
+        function initializeClocks() {
+            const clockGrid = document.getElementById('clockGrid');
+            
+            timeZones.forEach(zone => {
+                const card = document.createElement('div');
+                card.className = 'clock-card';
+                card.innerHTML = `
+                    <div class="timezone-name">${zone.name}</div>
+                    <div class="time-display" data-tz="${zone.tz}"></div>
+                    <div class="date-display" data-tz-date="${zone.tz}"></div>
+                `;
+                clockGrid.appendChild(card);
+            });
+
+            updateAllClocks();
+        }
+
+        function updateAllClocks() {
+            const timeElements = document.querySelectorAll('[data-tz]');
+            const dateElements = document.querySelectorAll('[data-tz-date]');
+
+            timeElements.forEach(element => {
+                const tz = element.getAttribute('data-tz');
+                const time = getTimeInZone(tz);
+                element.textContent = time;
+            });
+
+            dateElements.forEach(element => {
+                const tz = element.getAttribute('data-tz-date');
+                const date = getDateInZone(tz);
+                element.textContent = date;
+            });
+        }
+
+        function getTimeInZone(tz) {
+            const now = new Date();
+            const formatter = new Intl.DateTimeFormat('en-US', {
+                timeZone: tz,
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: false
+            });
+            return formatter.format(now);
+        }
+
+        function getDateInZone(tz) {
+            const now = new Date();
+            const formatter = new Intl.DateTimeFormat('en-US', {
+                timeZone: tz,
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+                weekday: 'short'
+            });
+            return formatter.format(now);
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', initializeClocks);
+
+        // Update every second
+        setInterval(updateAllClocks, 1000);
+    </script>
+</body>
+</html>
